@@ -1,19 +1,19 @@
-# vue-swipe-tab
+# vue-swipeable-tab
 
-A swipe tab Vue component, Compatible with Vue 2.x
+A swipeable tab Vue component, Compatible with Vue 2.x
 
 ## Install
 
 ``` sh
-npm install vue-swipe-tab
+npm install vue-swipeable-tab
 ```
 
 ``` js
-import SwipeTab from 'vue-swipe-tab'
+import SwipeableTab from 'vue-swipeable-tab'
 
 Vue.component('my-component', {
     components: {
-        SwipeTab
+        SwipeableTab
     }
 });
 ```

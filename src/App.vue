@@ -1,11 +1,11 @@
 <template lang="pug">
   div#app
     div
-      swipe-tab(:tabs="tabs" :components="components")
+      swipeable-tab(:tabs="tabs" :components="components")
 </template>
 
 <script>
-import SwipeTab from './components/SwipeTab'
+import SwipeableTab from './components/SwipeableTab'
 import Tab1 from './components/Tab1'
 
 export default {
@@ -25,7 +25,7 @@ export default {
     }
   },
   components: {
-    SwipeTab
+    SwipeableTab
   }
 }
 </script>

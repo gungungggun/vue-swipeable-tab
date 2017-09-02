@@ -21,7 +21,7 @@ var webpackConfig = merge(baseWebpackConfig, {
     })
   },
   devtool: config.build.productionSourceMap ? '#source-map' : false,
-  entry: '@/components/SwipeTab.vue',
+  entry: '@/components/SwipeableTab.vue',
   externals: {
     vue: 'vue'
   },
