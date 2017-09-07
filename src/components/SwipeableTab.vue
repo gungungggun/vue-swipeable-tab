@@ -1,8 +1,8 @@
 <template lang="pug">
-  div.swipe-tab
+  div.swipe-tab(:class="['theme-' + theme]")
     nav.tab
       ul
-        li(v-for="(t, i) in tabs")
+        li(v-for="(t, i) in tabs" :class="{active: current == i}")
           a(@click="tab(i)") {{ t }}
       div.arw-area
         div.arw
@@ -28,6 +28,18 @@ export default {
     components: {
       type: Array,
       default: []
+    },
+    theme: {
+      type: Number,
+      default: 1
+    },
+    speed: {
+      type: Number,
+      default: 100
+    },
+    touchThreshold: {
+      type: Number,
+      default: 4
     }
   },
   mounted () {
@@ -54,20 +66,27 @@ export default {
         arrows: false,
         infinite: false,
         edgeFriction: 0,
-        speed: 200,
+        speed: this.speed,
         swipeToSlide: true,
-        touchThreshold: 2
-      }
+        touchThreshold: this.touchThreshold
+      },
+      current: 0
     }
   },
   methods: {
     setPosition () {
-      let slide = this.$refs.slick.currentSlide()
-      this.arw.style.left = this.width / this.tabs.length * slide + 'px'
+      try {
+        let slide = this.$refs.slick.currentSlide()
+        this.arw.style.left = this.width / this.tabs.length * slide + 'px'
+        this.current = slide
+      } catch (e) {
+        console.log(e)
+      }
     },
     tab (num) {
       this.$refs.slick.goTo(num)
       this.arw.style.left = this.width / this.tabs.length * num + 'px'
+      this.current = num
     }
   },
   components: {
@@ -101,7 +120,7 @@ export default {
       height 2px
       position relative
       .arw
-        transition 0.2s
+        transition 0.1s
         display block
         width 33.3%
         height 2px
@@ -111,11 +130,32 @@ export default {
         bottom 0
   .view
     width 100%
-    height 100vh
+    height calc(100vh - 46px)
+    padding-top 46px
     overflow-y scroll
     &:focus
       outline none
     .scrollable
       width 100%
       min-height 90vh
+  &.theme-2
+    .tab
+      ul
+        li
+          padding 10px 2px
+          margin 0
+          a
+            color #313140
+            &:active, &:hover
+              text-decoration none
+          &.active
+            a
+              color #fff
+      .arw-area
+        z-index -1
+        top -4px
+        .arw
+          border-radius 5px
+          background #00a2fd
+          height 38px
 </style>
