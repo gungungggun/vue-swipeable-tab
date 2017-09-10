@@ -2,10 +2,13 @@
   div#app
     div
       swipeable-tab(:tabs="tabs" :components="components")
+    div
+      h2 test
+      p swipeable out
 </template>
 
 <script>
-import SwipeableTab from './components/SwipeableTab'
+import SwipeableTab from './components/VueSwipeableTab'
 import Tab1 from './components/Tab1'
 
 export default {
