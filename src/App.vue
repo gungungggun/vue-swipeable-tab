@@ -10,6 +10,8 @@
 <script>
 import SwipeableTab from './components/VueSwipeableTab'
 import Tab1 from './components/Tab1'
+import Tab2 from './components/Tab2'
+import Tab3 from './components/Tab3'
 
 export default {
   name: 'app',
@@ -22,8 +24,8 @@ export default {
       ],
       components: [
         Tab1,
-        Tab1,
-        Tab1
+        Tab2,
+        Tab3
       ]
     }
   },
@@ -41,5 +43,7 @@ body, html
 #app
   width 100%
   height 100vh
+  overflow-x hidden
+  overflow-y scroll
   background #f0f0f0
 </style>

@@ -1,6 +1,6 @@
 <template lang="pug">
   section
-    h1 Tab1
+    h1 Tab2
     p ofkoeofkoko
 
     h1 okokoodkoks
@@ -27,5 +27,5 @@
 
 <style lang="stylus" scoped>
 section
-  background #00f
+  background #0f0
 </style>

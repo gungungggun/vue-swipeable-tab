@@ -5,9 +5,9 @@
         li(v-for="(t, i) in tabs" :class="{active: current == i}")
           a(@click="tab(i)") {{ t }}
       div.arw-area
-        div.arw
+        div.arw(@move-arw="moveArw()")
 
-    div.inner
+    div.inner(v-smartscroll="")
       div.scrollable(:style="{width: 100 * components.length + 'vw'}")
         div.view(v-for="c in components")
           component(:is="c")
@@ -32,26 +32,41 @@ export default {
     speed: {
       type: Number,
       default: 100
-    },
-    touchThreshold: {
-      type: Number,
-      default: 4
+    }
+  },
+  directives: {
+    smartscroll: {
+      bind (el, binding, vnode) {
+        el.addEventListener('touchstart', (event) => {
+          el.addEventListener('touchmove', (event) => {
+          })
+        })
+        el.addEventListener('touchend', (event) => {
+          let width = window.innerWidth
+          let num = Math.round(el.scrollLeft / width)
+          let start = el.scrollLeft
+          let end = num * width
+          let currentTime = 0
+          let duration = 100
+          let interval = 10
+          let scroll = () => {
+            currentTime += interval
+            let s = start - end
+            s = s / (duration / interval)
+            el.scrollLeft = start - (s * (currentTime / interval))
+            if (currentTime < duration) {
+              setTimeout(scroll, interval)
+            }
+          }
+          scroll()
+        })
+      }
     }
   },
   mounted () {
-    let ths = this
-    const sl = document.getElementsByClassName('slick-slider')[0]
     this.arw = document.getElementsByClassName('arw')[0]
     this.width = window.innerWidth
     this.arw.style.width = this.width / this.tabs.length + 'px'
-    sl.addEventListener('touchstart', function (event) {
-      sl.addEventListener('touchmove', function (event) {
-        let track = document.getElementsByClassName('slick-track')[0]
-        let transform = track.style.transform
-        ths.x = parseInt(transform.split('px,')[0].replace('translate3d(', '')) * (-1)
-        ths.arw.style.left = (ths.x / ths.tabs.length) + 'px'
-      }, false)
-    })
   },
   data () {
     return {
@@ -70,14 +85,8 @@ export default {
     }
   },
   methods: {
-    setPosition () {
-      try {
-        let slide = this.$refs.slick.currentSlide()
-        this.arw.style.left = this.width / this.tabs.length * slide + 'px'
-        this.current = slide
-      } catch (e) {
-        console.log(e)
-      }
+    moveArw () {
+      console.log('OK')
     },
     tab (num) {
       this.$refs.slick.goTo(num)
@@ -96,8 +105,6 @@ export default {
     position absolute
     background #fff
     z-index 1
-    .scrollable
-      background #f00
     ul
       margin 0
       padding 0
@@ -127,12 +134,10 @@ export default {
     width 100vw
     height calc(100vh - 46px)
     padding-top 46px
-    overflow-x scroll
     overflow-y hidden
+    overflow-x scroll
     .scrollable
       width 100vw
-      min-height 150vh
-      background #0f0
       &:after
         content: "";
         display: block;
@@ -140,9 +145,10 @@ export default {
         clear: both;
         visibility:hidden;
       .view
-        overflow-y scroll
         width 100vw
         float left
+        height calc(100vh - 46px)
+        overflow-y scroll
   &.theme-2
     .tab
       ul
