@@ -1,7 +1,7 @@
 <template lang="pug">
   div#app
     div
-      swipeable-tab(:tabs="tabs" :components="components")
+      swipeable-tab(:tabs="tabs" :components="components" :theme="2")
     div
       h2 test
       p swipeable out

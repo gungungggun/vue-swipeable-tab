@@ -5,7 +5,7 @@
         li(v-for="(t, i) in tabs" :class="{active: current == i}")
           a(@click="tab(i)") {{ t }}
       div.arw-area
-        div.arw(@move-arw="moveArw()")
+        div.arw
 
     div.inner(v-smartscroll="")
       div.scrollable(:style="{width: 100 * components.length + 'vw'}")
@@ -29,16 +29,24 @@ export default {
       type: Number,
       default: 1
     },
-    speed: {
+    duration: {
       type: Number,
       default: 100
+    },
+    interval: {
+      type: Number,
+      default: 10
     }
   },
   directives: {
     smartscroll: {
       bind (el, binding, vnode) {
+        vnode.context.elScroll = el
         el.addEventListener('touchstart', (event) => {
           el.addEventListener('touchmove', (event) => {
+            let num = vnode.context.tabs.length
+            let originMove = el.scrollLeft
+            vnode.context.arw.style.left = (originMove / num) + 'px'
           })
         })
         el.addEventListener('touchend', (event) => {
@@ -46,51 +54,38 @@ export default {
           let num = Math.round(el.scrollLeft / width)
           let start = el.scrollLeft
           let end = num * width
-          let currentTime = 0
-          let duration = 100
-          let interval = 10
-          let scroll = () => {
-            currentTime += interval
-            let s = start - end
-            s = s / (duration / interval)
-            el.scrollLeft = start - (s * (currentTime / interval))
-            if (currentTime < duration) {
-              setTimeout(scroll, interval)
-            }
-          }
-          scroll()
+          vnode.context.scroll(el, 0, start, end)
+          vnode.context.current = num
+          vnode.context.arw.style.left = (width / vnode.context.tabs.length) * num + 'px'
         })
       }
     }
   },
   mounted () {
     this.arw = document.getElementsByClassName('arw')[0]
-    this.width = window.innerWidth
-    this.arw.style.width = this.width / this.tabs.length + 'px'
+    this.arw.style.width = window.innerWidth / this.tabs.length + 'px'
   },
   data () {
     return {
-      x: null,
+      elScroll: null,
       arw: null,
-      width: null,
-      options: {
-        arrows: false,
-        infinite: false,
-        edgeFriction: 0,
-        speed: this.speed,
-        swipeToSlide: true,
-        touchThreshold: this.touchThreshold
-      },
       current: 0
     }
   },
   methods: {
-    moveArw () {
-      console.log('OK')
+    scroll (el, currentTime, start, end) {
+      currentTime += this.interval
+      let s = start - end
+      s = s / (this.duration / this.interval)
+      el.scrollLeft = start - (s * (currentTime / this.interval))
+      if (currentTime < this.duration) {
+        let ths = this
+        setTimeout(() => { ths.scroll(el, currentTime, start, end) }, this.interval)
+      }
     },
     tab (num) {
-      this.$refs.slick.goTo(num)
-      this.arw.style.left = this.width / this.tabs.length * num + 'px'
+      this.arw.style.left = window.innerWidth / this.tabs.length * num + 'px'
+      this.scroll(this.elScroll, 0, this.elScroll.scrollLeft, window.innerWidth * num)
       this.current = num
     }
   }
