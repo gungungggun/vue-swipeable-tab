@@ -2,7 +2,7 @@
   div.swipe-tab(:class="['theme-' + theme]")
     nav.tab(:class="{flex: flex}")
       ul
-        li(v-for="(t, i) in tabs" :class="{active: current == i}")
+        li.tabs(v-for="(t, i) in tabs" :class="{active: current == i}")
           a(@click="tab(i)") {{ t }}
       div.arw-area
         div.arw
@@ -67,14 +67,35 @@ export default {
   },
   mounted () {
     this.elArw = document.getElementsByClassName('arw')[0]
-    this.elArwArea = document.getElementsByClassName('arw-area')[0]
-    this.elArw.style.width = window.innerWidth / this.tabs.length + 'px'
+    this.elTab = document.getElementsByClassName('tab')[0]
+    if (this.flex) {
+      this.elArw.style.width = window.innerWidth / this.tabs.length + 'px'
+    } else {
+      let tabs = document.getElementsByClassName('tabs')
+      let elms = []
+      let ths = this
+      let point = 0
+      elms.forEach.call(tabs, (e) => {
+        point += e.clientWidth
+        if (point < window.innerWidth / 2) {
+          this.middlePoint++
+        }
+        ths.tabsInfo.push({
+          width: e.clientWidth,
+          breakPoint: point - e.clientWidth / 2
+        })
+      })
+      this.arwAnimationNotFlex(0)
+    }
   },
   data () {
     return {
       elScroll: null,
       elArw: null,
-      current: 0
+      elTab: null,
+      current: 0,
+      tabsInfo: [],
+      middlePoint: 0
     }
   },
   methods: {
@@ -94,10 +115,39 @@ export default {
       this.current = num
     },
     arwAnimation (num, originMove) {
+      if (this.flex) {
+        this.arwAnimationFlex(num, originMove)
+      } else {
+        this.arwAnimationNotFlex(num, originMove)
+      }
+    },
+    arwAnimationFlex (num, originMove) {
       if (typeof originMove !== 'undefined') {
         this.elArw.style.left = (originMove / num) + 'px'
       } else {
         this.elArw.style.left = window.innerWidth / this.tabs.length * num + 'px'
+      }
+    },
+    arwAnimationNotFlex (num, originMove) {
+      if (typeof originMove !== 'undefined') {
+        if (this.current < this.middlePoint) {
+          this.elArw.style.left = (originMove / num) + 'px'
+        } else {
+          console.log(originMove / num)
+          this.elTab.scrollLeft = 100
+        }
+      } else {
+        this.elArw.style.width = this.tabsInfo[num].width + 'px'
+        let left = 0
+        for (let i = 0; i < num; i++) {
+          left += this.tabsInfo[i].width
+        }
+        if (num >= this.middlePoint) {
+          this.elTab.scrollLeft = this.tabsInfo[num].breakPoint - (window.innerWidth / 2)
+        } else {
+          this.elTab.scrollLeft = 0
+        }
+        this.elArw.style.left = left + 'px'
       }
     }
   }
@@ -132,18 +182,25 @@ export default {
       width 1000%
       li
         float left
-        padding 0 20px
         a
+          padding 5px 15px
+          box-sizing border-box
+          background #000
+          color #999
           display block
           width 100%
           text-align center
+        &.active
+          a
+            color #fff
+
     .arw-area
       width 100%
       height 2px
       position relative
-      top 22px
+      top 32px
       .arw
-        transition 0.1s
+        transition 0.2s
         display block
         width 33.3%
         height 2px
