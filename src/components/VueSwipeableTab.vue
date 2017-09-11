@@ -1,6 +1,6 @@
 <template lang="pug">
   div.swipe-tab(:class="['theme-' + theme]")
-    nav.tab
+    nav.tab(:class="{flex: flex}")
       ul
         li(v-for="(t, i) in tabs" :class="{active: current == i}")
           a(@click="tab(i)") {{ t }}
@@ -29,6 +29,10 @@ export default {
       type: Number,
       default: 1
     },
+    flex: {
+      type: Boolean,
+      dafault: true
+    },
     duration: {
       type: Number,
       default: 100
@@ -46,7 +50,7 @@ export default {
           el.addEventListener('touchmove', (event) => {
             let num = vnode.context.tabs.length
             let originMove = el.scrollLeft
-            vnode.context.arw.style.left = (originMove / num) + 'px'
+            vnode.context.arwAnimation(num, originMove)
           })
         })
         el.addEventListener('touchend', (event) => {
@@ -56,19 +60,20 @@ export default {
           let end = num * width
           vnode.context.scroll(el, 0, start, end)
           vnode.context.current = num
-          vnode.context.arw.style.left = (width / vnode.context.tabs.length) * num + 'px'
+          vnode.context.arwAnimation(num)
         })
       }
     }
   },
   mounted () {
-    this.arw = document.getElementsByClassName('arw')[0]
-    this.arw.style.width = window.innerWidth / this.tabs.length + 'px'
+    this.elArw = document.getElementsByClassName('arw')[0]
+    this.elArwArea = document.getElementsByClassName('arw-area')[0]
+    this.elArw.style.width = window.innerWidth / this.tabs.length + 'px'
   },
   data () {
     return {
       elScroll: null,
-      arw: null,
+      elArw: null,
       current: 0
     }
   },
@@ -84,9 +89,16 @@ export default {
       }
     },
     tab (num) {
-      this.arw.style.left = window.innerWidth / this.tabs.length * num + 'px'
+      this.arwAnimation(num)
       this.scroll(this.elScroll, 0, this.elScroll.scrollLeft, window.innerWidth * num)
       this.current = num
+    },
+    arwAnimation (num, originMove) {
+      if (typeof originMove !== 'undefined') {
+        this.elArw.style.left = (originMove / num) + 'px'
+      } else {
+        this.elArw.style.left = window.innerWidth / this.tabs.length * num + 'px'
+      }
     }
   }
 }
@@ -100,14 +112,27 @@ export default {
     position absolute
     background #fff
     z-index 1
+    width 100vw
+    overflow-x scroll
+    &.flex
+      ul
+        width 100%
+        float none
+        padding 0
+        display flex
+        justify-content space-around
+        li
+          width 100%
+      .arw-area
+        top auto
     ul
       margin 0
       padding 0
       list-style none
-      display flex
-      justify-content space-around
+      width 1000%
       li
-        width 100%
+        float left
+        padding 0 20px
         a
           display block
           width 100%
@@ -116,6 +141,7 @@ export default {
       width 100%
       height 2px
       position relative
+      top 22px
       .arw
         transition 0.1s
         display block

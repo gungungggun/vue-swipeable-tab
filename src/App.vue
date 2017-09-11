@@ -1,7 +1,7 @@
 <template lang="pug">
   div#app
     div
-      swipeable-tab(:tabs="tabs" :components="components" :theme="2")
+      swipeable-tab(:tabs="tabs" :components="components" :theme="1" :flex="false")
     div
       h2 test
       p swipeable out
@@ -20,9 +20,15 @@ export default {
       tabs: [
         'タブ１',
         'タブ２',
-        'タブ３'
+        'タブ３',
+        'タブ４',
+        'タブ５',
+        'タブ６'
       ],
       components: [
+        Tab1,
+        Tab2,
+        Tab3,
         Tab1,
         Tab2,
         Tab3
