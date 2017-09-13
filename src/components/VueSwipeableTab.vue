@@ -46,6 +46,7 @@ export default {
     smartscroll: {
       bind (el, binding, vnode) {
         vnode.context.elScroll = el
+        /*
         el.addEventListener('touchstart', (event) => {
           el.addEventListener('touchmove', (event) => {
             let num = vnode.context.tabs.length
@@ -53,7 +54,13 @@ export default {
             vnode.context.arwAnimation(num, originMove)
           })
         })
+        */
+        el.addEventListener('touchstart', (event) => {
+          vnode.context.isTouch = true
+        })
         el.addEventListener('touchend', (event) => {
+          console.log('touchend')
+          vnode.context.isTouch = false
           let width = window.innerWidth
           let num = Math.round(el.scrollLeft / width)
           let start = el.scrollLeft
@@ -61,6 +68,22 @@ export default {
           vnode.context.scroll(el, 0, start, end)
           vnode.context.current = num
           vnode.context.arwAnimation(num)
+        })
+        el.addEventListener('scroll', (event) => {
+          let oldX = vnode.context.nowX
+          let nowX = el.scrollLeft
+          if (oldX !== nowX) {
+            vnode.context.nowX = nowX
+            el.dispatchEvent(new Event('scroll-x'))
+          }
+        })
+        el.addEventListener('scroll-x', (event) => {
+          console.log('scroll-x')
+          if (vnode.context.isTouch) {
+            let num = vnode.context.tabs.length
+            let originMove = el.scrollLeft
+            vnode.context.arwAnimation(num, originMove)
+          }
         })
       }
     }
@@ -95,7 +118,9 @@ export default {
       elTab: null,
       current: 0,
       tabsInfo: [],
-      middlePoint: 0
+      middlePoint: 0,
+      nowX: 0,
+      isTouch: false
     }
   },
   methods: {
@@ -130,8 +155,9 @@ export default {
     },
     arwAnimationNotFlex (num, originMove) {
       if (typeof originMove !== 'undefined') {
+        let x = ((originMove - window.innerWidth * this.current) / window.innerWidth) * this.tabsInfo[this.current].width
         if (this.current < this.middlePoint) {
-          this.elArw.style.left = (originMove / num) + 'px'
+          this.elArw.style.left = x + 'px'
         } else {
           console.log(originMove / num)
           this.elTab.scrollLeft = 100
@@ -193,6 +219,7 @@ export default {
         &.active
           a
             color #fff
+            text-decoration none
 
     .arw-area
       width 100%
@@ -200,7 +227,7 @@ export default {
       position relative
       top 32px
       .arw
-        transition 0.2s
+        transition 0.1s
         display block
         width 33.3%
         height 2px
