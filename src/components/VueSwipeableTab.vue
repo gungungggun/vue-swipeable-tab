@@ -8,9 +8,10 @@
         div.arw(:style="{width: arwWidth + 'px', left: arwLeft + 'px'}")
 
     div.inner(v-smartscroll="")
-      div.scrollable(:style="{width: 100 * components.length + 'vw'}")
-        div.view(v-for="c in components")
-          component(:is="c")
+      div.scrollable(:style="{width: scrollableWidth + 'vw', transform: 'translateX(-' + scrollableX + 'vw)'}")
+        div.background(:style="{width: 100 * components.length + 'vw'}")
+          div.view(v-for="c in components")
+            component(:is="c")
 </template>
 
 <script>
@@ -39,7 +40,9 @@ export default {
       nowX: 0,
       isTouch: false,
       arwWidth: 0,
-      arwLeft: 0
+      arwLeft: 0,
+      scrollableWidth: 0,
+      scrollableX: 0
     }
   },
   directives: {
@@ -65,15 +68,21 @@ export default {
           let oldX = vnode.context.nowX
           let nowX = el.scrollLeft
           if (oldX !== nowX) {
+            vnode.context.oldX = oldX
             vnode.context.nowX = nowX
             el.dispatchEvent(new Event('scroll-x'))
           }
         })
         el.addEventListener('scroll-x', (event) => {
-          if (vnode.context.isTouch) {
+          let c = vnode.context
+          if (c.isTouch) {
             // let num = vnode.context.tabs.length
             // let originMove = el.scrollLeft
-            vnode.context.arwAnimation()
+            if (c.getDistance() > 1) {
+              c.scrollableWidth = 100 * (c.current + 2)
+              return false
+            }
+            c.arwAnimation()
           } else {
             console.log('force' + vnode.context.current)
           }
@@ -83,6 +92,7 @@ export default {
   },
   mounted () {
     this.elTab = document.getElementsByClassName('tab')[0]
+    this.scrollableWidth = 200
     let tabs = document.getElementsByClassName('tabs')
     let elms = []
     let left = 0
@@ -100,24 +110,39 @@ export default {
     })
     this.arwWidth = this.tabsInfo[0].width
     this.arwLeft = this.tabsInfo[0].left
-    console.log(this.tabsInfo)
-    // this.arwAnimation(0)
   },
   methods: {
     scroll (num) {
-      this.elScroll.scrollLeft = window.innerWidth * num
+      if (num !== this.components.length - 1) {
+        this.scrollableWidth = 100 * (num + 2)
+      } else {
+        this.scrollableWidth = 100 * (num + 1)
+      }
+      if (num > 1) {
+        this.scrollableX = 100 * (num - 1)
+      } else {
+        this.scrollableX = 0
+      }
+      if (num > 0) {
+        this.elScroll.scrollLeft = window.innerWidth // * num
+      } else {
+        this.elScroll.scrollLeft = 0
+      }
       this.current = num
     },
     tab (num) {
       this.scroll(num)
       this.arwWidth = this.tabsInfo[num].width
       this.arwLeft = this.tabsInfo[num].left
-
       this.elTab.scrollLeft = this.tabsInfo[num].center - (window.innerWidth / 2)
     },
     getDistance () {
       let nowScroll = this.elScroll.scrollLeft
-      return (nowScroll - (window.innerWidth * this.current)) / window.innerWidth
+      let w = 0
+      if (this.scrollableWidth > 200) {
+        w = window.innerWidth
+      }
+      return (nowScroll - w) / window.innerWidth
     },
     getS (input) {
       let nxt = 1
@@ -196,6 +221,7 @@ export default {
     overflow-x scroll
     .scrollable
       width 100vw
+      overflow hidden
       &:after
         content: "";
         display: block;
