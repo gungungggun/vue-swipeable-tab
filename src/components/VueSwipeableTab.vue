@@ -42,19 +42,22 @@ export default {
       default: 10
     }
   },
+  data () {
+    return {
+      elScroll: null,
+      elArw: null,
+      elTab: null,
+      current: 0,
+      tabsInfo: [],
+      middlePoint: 0,
+      nowX: 0,
+      isTouch: false
+    }
+  },
   directives: {
     smartscroll: {
       bind (el, binding, vnode) {
         vnode.context.elScroll = el
-        /*
-        el.addEventListener('touchstart', (event) => {
-          el.addEventListener('touchmove', (event) => {
-            let num = vnode.context.tabs.length
-            let originMove = el.scrollLeft
-            vnode.context.arwAnimation(num, originMove)
-          })
-        })
-        */
         el.addEventListener('touchstart', (event) => {
           vnode.context.isTouch = true
         })
@@ -63,11 +66,12 @@ export default {
           vnode.context.isTouch = false
           let width = window.innerWidth
           let num = Math.round(el.scrollLeft / width)
-          let start = el.scrollLeft
-          let end = num * width
-          vnode.context.scroll(el, 0, start, end)
+          // let start = el.scrollLeft
+          // let end = num * width
+          // vnode.context.scroll(el, 0, start, end)
           vnode.context.current = num
           vnode.context.arwAnimation(num)
+          el.scrollLeft = window.innerWidth * num
         })
         el.addEventListener('scroll', (event) => {
           let oldX = vnode.context.nowX
@@ -83,6 +87,9 @@ export default {
             let num = vnode.context.tabs.length
             let originMove = el.scrollLeft
             vnode.context.arwAnimation(num, originMove)
+          } else {
+            console.log('force' + vnode.context.current)
+            el.scrollLeft = window.innerWidth * vnode.context.current
           }
         })
       }
@@ -105,22 +112,11 @@ export default {
         }
         ths.tabsInfo.push({
           width: e.clientWidth,
+          right: point,
           breakPoint: point - e.clientWidth / 2
         })
       })
       this.arwAnimationNotFlex(0)
-    }
-  },
-  data () {
-    return {
-      elScroll: null,
-      elArw: null,
-      elTab: null,
-      current: 0,
-      tabsInfo: [],
-      middlePoint: 0,
-      nowX: 0,
-      isTouch: false
     }
   },
   methods: {
@@ -209,7 +205,7 @@ export default {
       li
         float left
         a
-          padding 5px 15px
+          padding 7px 15px
           box-sizing border-box
           background #000
           color #999
@@ -225,7 +221,7 @@ export default {
       width 100%
       height 2px
       position relative
-      top 32px
+      top 36px
       .arw
         transition 0.1s
         display block
@@ -237,8 +233,8 @@ export default {
         bottom 0
   .inner
     width 100vw
-    height calc(100vh - 46px)
-    padding-top 46px
+    height calc(100vh - 38px)
+    padding-top 38px
     overflow-y hidden
     overflow-x scroll
     .scrollable
@@ -252,7 +248,7 @@ export default {
       .view
         width 100vw
         float left
-        height calc(100vh - 46px)
+        height calc(100vh - 38px)
         overflow-y scroll
   &.theme-2
     .tab

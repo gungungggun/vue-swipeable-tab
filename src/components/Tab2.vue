@@ -27,5 +27,6 @@
 
 <style lang="stylus" scoped>
 section
+  overflow hidden
   background #0f0
 </style>
