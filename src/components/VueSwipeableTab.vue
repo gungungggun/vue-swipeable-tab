@@ -86,10 +86,15 @@ export default {
     let tabs = document.getElementsByClassName('tabs')
     let elms = []
     let left = 0
+    let right = 0
     elms.forEach.call(tabs, (e) => {
+      right += e.clientWidth
+      let center = left + (e.clientWidth / 2)
       this.tabsInfo.push({
         width: e.clientWidth,
-        left: left
+        left: left,
+        right: right,
+        center: center
       })
       left += e.clientWidth
     })
@@ -107,17 +112,23 @@ export default {
       this.scroll(num)
       this.arwWidth = this.tabsInfo[num].width
       this.arwLeft = this.tabsInfo[num].left
+
+      this.elTab.scrollLeft = this.tabsInfo[num].center - (window.innerWidth / 2)
     },
     getDistance () {
       let nowScroll = this.elScroll.scrollLeft
       return (nowScroll - (window.innerWidth * this.current)) / window.innerWidth
     },
-    arwAnimation () {
+    getS (input) {
       let nxt = 1
       let distance = this.getDistance()
       if (distance < 0) nxt = -1
-      this.arwLeft = this.tabsInfo[this.current].left + (this.tabsInfo[this.current + nxt].left - this.tabsInfo[this.current].left) * distance * nxt
-      this.arwWidth = this.tabsInfo[this.current].width + (this.tabsInfo[this.current + nxt].width - this.tabsInfo[this.current].width) * distance * nxt
+      return this.tabsInfo[this.current][input] + (this.tabsInfo[this.current + nxt][input] - this.tabsInfo[this.current][input]) * distance * nxt
+    },
+    arwAnimation () {
+      this.arwLeft = this.getS('left')
+      this.arwWidth = this.getS('width')
+      this.elTab.scrollLeft = this.getS('center') - (window.innerWidth / 2)
     }
   }
 }
