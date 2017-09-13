@@ -37,6 +37,7 @@ export default {
       elTab: null,
       current: 0,
       tabsInfo: [],
+      touchX: 0,
       nowX: 0,
       oldX: 0,
       isTouch: false,
@@ -56,35 +57,52 @@ export default {
         }
         el.addEventListener('touchstart', (event) => {
           c.isTouch = true
+          c.touchX = event.touches[0].clientX
           window.removeEventListener('touchmove', handleTouchMove, false)
         })
         el.addEventListener('touchend', (event) => {
-          // console.log('touchend')
           c.isTouch = false
           window.addEventListener('touchmove', handleTouchMove, { passive: false })
-          // if (c.getDistance() > 0.5) {
-          //   c.tab(c.current + 1)
-          // } else if (c.getDistance() < -0.5) {
-          //   c.tab(c.current - 1)
-          // } else {
-          //   c.tab(c.current)
-          // }
-          // console.log('touchend:end')
+          // let d = Math.abs(c.oldX - c.nowX)
+          // console.log(d)
+          let time = 100
+          setTimeout(() => {
+            if (c.getDistance() > 0.5) {
+              c.tab(c.current + 1)
+            } else if (c.getDistance() < -0.5) {
+              c.tab(c.current - 1)
+            } else {
+              c.tab(c.current)
+            }
+          }, time)
         })
         el.addEventListener('scroll', (event) => {
+          c.arwAnimation()
+          // let oldX = c.nowX
+          // let nowX = el.scrollLeft
+          /* if (oldX !== nowX) {
+            c.oldX = oldX
+            c.nowX = nowX
+            c.arwAnimation()
+          } */
+        })
+        el.addEventListener('touchmove', (event) => {
+          let touchX = event.touches[0].clientX
+          el.scrollLeft += (c.touchX - touchX)
+          c.touchX = touchX
+
           let oldX = c.nowX
           let nowX = el.scrollLeft
           if (oldX !== nowX) {
             c.oldX = oldX
             c.nowX = nowX
-            c.arwAnimation()
             if (c.isTouch) {
               if (c.getDistance() > 1) {
                 c.scrollableWidth = 100 * (c.current + 2)
                 return false
               }
             } else {
-              console.log('warn: old:' + c.oldX + ', new:' + c.nowX)
+              // console.log('warn: old:' + c.oldX + ', new:' + c.nowX)
               // if (c.nowX > 360) {
               //   el.scrollLeft = 360
               //   c.nowX = 360
@@ -142,11 +160,10 @@ export default {
       this.current = num
     },
     tab (num) {
-      this.scroll(num)
       this.arwWidth = this.tabsInfo[num].width
       this.arwLeft = this.tabsInfo[num].left
       this.elTab.scrollLeft = this.tabsInfo[num].center - (window.innerWidth / 2)
-      console.log('tab')
+      this.scroll(num)
     },
     getDistance () {
       let nowScroll = this.elScroll.scrollLeft
@@ -231,7 +248,7 @@ export default {
     height calc(100vh - 38px)
     padding-top 38px
     overflow-y hidden
-    overflow-x scroll
+    overflow-x hidden
     .scrollable
       width 100vw
       overflow hidden
