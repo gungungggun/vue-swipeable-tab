@@ -38,6 +38,7 @@ export default {
       current: 0,
       tabsInfo: [],
       nowX: 0,
+      oldX: 0,
       isTouch: false,
       arwWidth: 0,
       arwLeft: 0,
@@ -48,43 +49,49 @@ export default {
   directives: {
     smartscroll: {
       bind (el, binding, vnode) {
-        vnode.context.elScroll = el
+        let c = vnode.context
+        c.elScroll = el
         el.addEventListener('touchstart', (event) => {
-          vnode.context.isTouch = true
+          c.isTouch = true
         })
         el.addEventListener('touchend', (event) => {
           console.log('touchend')
-          vnode.context.isTouch = false
-          // let width = window.innerWidth
-          // let num = Math.round(el.scrollLeft / width)
-          // let start = el.scrollLeft
-          // let end = num * width
-          // vnode.context.scroll(el, 0, start, end)
-          // vnode.context.current = num
-          // vnode.context.arwAnimation(num)
-          // el.scrollLeft = window.innerWidth * num
+          c.isTouch = false
+          if (c.getDistance() > 0.5) {
+            c.tab(c.current + 1)
+          } else if (c.getDistance() < -0.5) {
+            c.tab(c.current - 1)
+          } else {
+            c.tab(c.current)
+          }
+          console.log('touchend:end')
         })
         el.addEventListener('scroll', (event) => {
-          let oldX = vnode.context.nowX
+          let oldX = c.nowX
           let nowX = el.scrollLeft
           if (oldX !== nowX) {
-            vnode.context.oldX = oldX
-            vnode.context.nowX = nowX
-            el.dispatchEvent(new Event('scroll-x'))
-          }
-        })
-        el.addEventListener('scroll-x', (event) => {
-          let c = vnode.context
-          if (c.isTouch) {
-            // let num = vnode.context.tabs.length
-            // let originMove = el.scrollLeft
-            if (c.getDistance() > 1) {
-              c.scrollableWidth = 100 * (c.current + 2)
-              return false
+            c.oldX = oldX
+            c.nowX = nowX
+            if (c.isTouch) {
+              if (c.getDistance() > 1) {
+                c.scrollableWidth = 100 * (c.current + 2)
+                return false
+              }
+              c.arwAnimation()
+            } else {
+              console.log('warn: old:' + c.oldX + ', new:' + c.nowX)
+              if (c.nowX > 360) {
+                el.scrollLeft = 360
+                c.nowX = 360
+              }
+              if (c.nowX <= 0) {
+                el.scrollLeft = 0
+                c.nowX = 0
+              }
+              // window.addEventListener('touchmove', (e) => { e.preventDefault() }, { passive: false })
+              // el.scrollLeft = oldX
+              // c.nowX = oldX
             }
-            c.arwAnimation()
-          } else {
-            console.log('force' + vnode.context.current)
           }
         })
       }
@@ -135,6 +142,7 @@ export default {
       this.arwWidth = this.tabsInfo[num].width
       this.arwLeft = this.tabsInfo[num].left
       this.elTab.scrollLeft = this.tabsInfo[num].center - (window.innerWidth / 2)
+      console.log('tab')
     },
     getDistance () {
       let nowScroll = this.elScroll.scrollLeft
