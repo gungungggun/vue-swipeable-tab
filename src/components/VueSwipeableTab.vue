@@ -1,11 +1,11 @@
 <template lang="pug">
   div.swipe-tab(:class="['theme-' + theme]")
-    nav.tab(:class="{flex: flex}")
+    nav.tab
       ul
         li.tabs(v-for="(t, i) in tabs" :class="{active: current == i}")
           a(@click="tab(i)") {{ t }}
       div.arw-area
-        div.arw
+        div.arw(:style="{width: arwWidth + 'px', left: arwLeft + 'px'}")
 
     div.inner(v-smartscroll="")
       div.scrollable(:style="{width: 100 * components.length + 'vw'}")
@@ -28,30 +28,18 @@ export default {
     theme: {
       type: Number,
       default: 1
-    },
-    flex: {
-      type: Boolean,
-      dafault: true
-    },
-    duration: {
-      type: Number,
-      default: 100
-    },
-    interval: {
-      type: Number,
-      default: 10
     }
   },
   data () {
     return {
       elScroll: null,
-      elArw: null,
       elTab: null,
       current: 0,
       tabsInfo: [],
-      middlePoint: 0,
       nowX: 0,
-      isTouch: false
+      isTouch: false,
+      arwWidth: 0,
+      arwLeft: 0
     }
   },
   directives: {
@@ -64,14 +52,14 @@ export default {
         el.addEventListener('touchend', (event) => {
           console.log('touchend')
           vnode.context.isTouch = false
-          let width = window.innerWidth
-          let num = Math.round(el.scrollLeft / width)
+          // let width = window.innerWidth
+          // let num = Math.round(el.scrollLeft / width)
           // let start = el.scrollLeft
           // let end = num * width
           // vnode.context.scroll(el, 0, start, end)
-          vnode.context.current = num
-          vnode.context.arwAnimation(num)
-          el.scrollLeft = window.innerWidth * num
+          // vnode.context.current = num
+          // vnode.context.arwAnimation(num)
+          // el.scrollLeft = window.innerWidth * num
         })
         el.addEventListener('scroll', (event) => {
           let oldX = vnode.context.nowX
@@ -82,95 +70,54 @@ export default {
           }
         })
         el.addEventListener('scroll-x', (event) => {
-          console.log('scroll-x')
           if (vnode.context.isTouch) {
-            let num = vnode.context.tabs.length
-            let originMove = el.scrollLeft
-            vnode.context.arwAnimation(num, originMove)
+            // let num = vnode.context.tabs.length
+            // let originMove = el.scrollLeft
+            vnode.context.arwAnimation()
           } else {
             console.log('force' + vnode.context.current)
-            el.scrollLeft = window.innerWidth * vnode.context.current
           }
         })
       }
     }
   },
   mounted () {
-    this.elArw = document.getElementsByClassName('arw')[0]
     this.elTab = document.getElementsByClassName('tab')[0]
-    if (this.flex) {
-      this.elArw.style.width = window.innerWidth / this.tabs.length + 'px'
-    } else {
-      let tabs = document.getElementsByClassName('tabs')
-      let elms = []
-      let ths = this
-      let point = 0
-      elms.forEach.call(tabs, (e) => {
-        point += e.clientWidth
-        if (point < window.innerWidth / 2) {
-          this.middlePoint++
-        }
-        ths.tabsInfo.push({
-          width: e.clientWidth,
-          right: point,
-          breakPoint: point - e.clientWidth / 2
-        })
+    let tabs = document.getElementsByClassName('tabs')
+    let elms = []
+    let left = 0
+    elms.forEach.call(tabs, (e) => {
+      this.tabsInfo.push({
+        width: e.clientWidth,
+        left: left
       })
-      this.arwAnimationNotFlex(0)
-    }
+      left += e.clientWidth
+    })
+    this.arwWidth = this.tabsInfo[0].width
+    this.arwLeft = this.tabsInfo[0].left
+    console.log(this.tabsInfo)
+    // this.arwAnimation(0)
   },
   methods: {
-    scroll (el, currentTime, start, end) {
-      currentTime += this.interval
-      let s = start - end
-      s = s / (this.duration / this.interval)
-      el.scrollLeft = start - (s * (currentTime / this.interval))
-      if (currentTime < this.duration) {
-        let ths = this
-        setTimeout(() => { ths.scroll(el, currentTime, start, end) }, this.interval)
-      }
-    },
-    tab (num) {
-      this.arwAnimation(num)
-      this.scroll(this.elScroll, 0, this.elScroll.scrollLeft, window.innerWidth * num)
+    scroll (num) {
+      this.elScroll.scrollLeft = window.innerWidth * num
       this.current = num
     },
-    arwAnimation (num, originMove) {
-      if (this.flex) {
-        this.arwAnimationFlex(num, originMove)
-      } else {
-        this.arwAnimationNotFlex(num, originMove)
-      }
+    tab (num) {
+      this.scroll(num)
+      this.arwWidth = this.tabsInfo[num].width
+      this.arwLeft = this.tabsInfo[num].left
     },
-    arwAnimationFlex (num, originMove) {
-      if (typeof originMove !== 'undefined') {
-        this.elArw.style.left = (originMove / num) + 'px'
-      } else {
-        this.elArw.style.left = window.innerWidth / this.tabs.length * num + 'px'
-      }
+    getDistance () {
+      let nowScroll = this.elScroll.scrollLeft
+      return (nowScroll - (window.innerWidth * this.current)) / window.innerWidth
     },
-    arwAnimationNotFlex (num, originMove) {
-      if (typeof originMove !== 'undefined') {
-        let x = ((originMove - window.innerWidth * this.current) / window.innerWidth) * this.tabsInfo[this.current].width
-        if (this.current < this.middlePoint) {
-          this.elArw.style.left = x + 'px'
-        } else {
-          console.log(originMove / num)
-          this.elTab.scrollLeft = 100
-        }
-      } else {
-        this.elArw.style.width = this.tabsInfo[num].width + 'px'
-        let left = 0
-        for (let i = 0; i < num; i++) {
-          left += this.tabsInfo[i].width
-        }
-        if (num >= this.middlePoint) {
-          this.elTab.scrollLeft = this.tabsInfo[num].breakPoint - (window.innerWidth / 2)
-        } else {
-          this.elTab.scrollLeft = 0
-        }
-        this.elArw.style.left = left + 'px'
-      }
+    arwAnimation () {
+      let nxt = 1
+      let distance = this.getDistance()
+      if (distance < 0) nxt = -1
+      this.arwLeft = this.tabsInfo[this.current].left + (this.tabsInfo[this.current + nxt].left - this.tabsInfo[this.current].left) * distance * nxt
+      this.arwWidth = this.tabsInfo[this.current].width + (this.tabsInfo[this.current + nxt].width - this.tabsInfo[this.current].width) * distance * nxt
     }
   }
 }
@@ -225,7 +172,6 @@ export default {
       .arw
         transition 0.1s
         display block
-        width 33.3%
         height 2px
         background #f00
         position absolute
