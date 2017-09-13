@@ -51,20 +51,25 @@ export default {
       bind (el, binding, vnode) {
         let c = vnode.context
         c.elScroll = el
+        let handleTouchMove = (e) => {
+          e.preventDefault()
+        }
         el.addEventListener('touchstart', (event) => {
           c.isTouch = true
+          window.removeEventListener('touchmove', handleTouchMove, false)
         })
         el.addEventListener('touchend', (event) => {
-          console.log('touchend')
+          // console.log('touchend')
           c.isTouch = false
-          if (c.getDistance() > 0.5) {
-            c.tab(c.current + 1)
-          } else if (c.getDistance() < -0.5) {
-            c.tab(c.current - 1)
-          } else {
-            c.tab(c.current)
-          }
-          console.log('touchend:end')
+          window.addEventListener('touchmove', handleTouchMove, { passive: false })
+          // if (c.getDistance() > 0.5) {
+          //   c.tab(c.current + 1)
+          // } else if (c.getDistance() < -0.5) {
+          //   c.tab(c.current - 1)
+          // } else {
+          //   c.tab(c.current)
+          // }
+          // console.log('touchend:end')
         })
         el.addEventListener('scroll', (event) => {
           let oldX = c.nowX
@@ -72,23 +77,22 @@ export default {
           if (oldX !== nowX) {
             c.oldX = oldX
             c.nowX = nowX
+            c.arwAnimation()
             if (c.isTouch) {
               if (c.getDistance() > 1) {
                 c.scrollableWidth = 100 * (c.current + 2)
                 return false
               }
-              c.arwAnimation()
             } else {
               console.log('warn: old:' + c.oldX + ', new:' + c.nowX)
-              if (c.nowX > 360) {
-                el.scrollLeft = 360
-                c.nowX = 360
-              }
-              if (c.nowX <= 0) {
-                el.scrollLeft = 0
-                c.nowX = 0
-              }
-              // window.addEventListener('touchmove', (e) => { e.preventDefault() }, { passive: false })
+              // if (c.nowX > 360) {
+              //   el.scrollLeft = 360
+              //   c.nowX = 360
+              // }
+              // if (c.nowX <= 0) {
+              //   el.scrollLeft = 0
+              //   c.nowX = 0
+              // }
               // el.scrollLeft = oldX
               // c.nowX = oldX
             }
@@ -156,6 +160,7 @@ export default {
       let nxt = 1
       let distance = this.getDistance()
       if (distance < 0) nxt = -1
+      if (this.current + nxt === this.components.length) return this.tabsInfo[this.current][input]
       return this.tabsInfo[this.current][input] + (this.tabsInfo[this.current + nxt][input] - this.tabsInfo[this.current][input]) * distance * nxt
     },
     arwAnimation () {
