@@ -52,17 +52,12 @@ export default {
       bind (el, binding, vnode) {
         let c = vnode.context
         c.elScroll = el
-        let handleTouchMove = (e) => {
-          e.preventDefault()
-        }
         el.addEventListener('touchstart', (event) => {
           c.isTouch = true
           c.touchX = event.touches[0].clientX
-          window.removeEventListener('touchmove', handleTouchMove, false)
         })
         el.addEventListener('touchend', (event) => {
           c.isTouch = false
-          window.addEventListener('touchmove', handleTouchMove, { passive: false })
           // let d = Math.abs(c.oldX - c.nowX)
           // console.log(d)
           let time = 100
@@ -195,13 +190,12 @@ export default {
   .tab
     width 100%
     position absolute
-    background #fff
+    background #000
     z-index 1
     width 100vw
     overflow-x scroll
     &.flex
       ul
-        width 100%
         float none
         padding 0
         display flex

@@ -52,4 +52,6 @@ body, html
   overflow-x hidden
   overflow-y scroll
   background #f0f0f0
+*::-webkit-scrollbar
+  display none
 </style>
