@@ -8,10 +8,9 @@
         div.arw(:style="{width: arwWidth + 'px', left: arwLeft + 'px'}")
 
     div.inner(v-smartscroll="")
-      div.scrollable(:style="{width: scrollableWidth + 'vw', transform: 'translateX(-' + scrollableX + 'vw)'}")
-        div.background(:style="{width: 100 * components.length + 'vw'}")
-          div.view(v-for="(c, i) in components" :id="'view' + i" :class="{lock: isLock.y}" v-viewscroll="")
-            component(:is="c")
+      div.scrollable(:style="{width: components.length * 100 + 'vw'}")
+        div.view(v-for="(c, i) in components" :id="'view' + i" :class="{lock: isLock.y}" v-viewscroll="")
+          component(:is="c")
 </template>
 
 <script>
@@ -41,8 +40,6 @@ export default {
       oldX: 0,
       arwWidth: 0,
       arwLeft: 0,
-      scrollableWidth: 0,
-      scrollableX: 0,
       isLock: {
         x: false,
         y: false
@@ -104,7 +101,6 @@ export default {
   },
   mounted () {
     this.elTab = document.getElementsByClassName('tab')[0]
-    this.scrollableWidth = 200
     let tabs = document.getElementsByClassName('tabs')
     let elms = []
     let left = 0
@@ -124,30 +120,19 @@ export default {
     this.arwLeft = this.tabsInfo[0].left
   },
   methods: {
-    scroll (num) {
-      let scrollLeft = 0
-      if (num > 0) {
-        scrollLeft = window.innerWidth
-      }
-      this.smooth(num, scrollLeft)
-    },
-    smooth (num, target, d) {
-      d = d || (target - this.elScroll.scrollLeft) / 10
+    scroll (num, target, d) {
+      target = target || num * window.innerWidth
+      d = d || (target - this.elScroll.scrollLeft) / 5
+      let pm = d > 0 ? 1 : -1
       setTimeout(() => {
-        if (target !== this.elScroll.scrollLeft) {
-          this.elScroll.scrollLeft += d
-          this.smooth(num, target, d)
+        if (target * pm > this.elScroll.scrollLeft * pm) {
+          if ((this.elScroll.scrollLeft + d) * pm > target * pm) {
+            this.elScroll.scrollLeft = target
+          } else {
+            this.elScroll.scrollLeft += d
+          }
+          this.scroll(num, target, d)
         } else {
-          if (num !== this.components.length - 1) {
-            this.scrollableWidth = 100 * (num + 2)
-          } else {
-            this.scrollableWidth = 100 * (num + 1)
-          }
-          if (num > 1) {
-            this.scrollableX = 100 * (num - 1)
-          } else {
-            this.scrollableX = 0
-          }
           this.current = num
         }
       }, 10)
@@ -159,18 +144,12 @@ export default {
       this.scroll(num)
     },
     getDistance () {
-      let nowScroll = this.elScroll.scrollLeft
-      let w = 0
-      if (this.scrollableWidth > 200) {
-        w = window.innerWidth
-      }
-      return (nowScroll - w) / window.innerWidth
+      return (this.elScroll.scrollLeft - (window.innerWidth * this.current)) / window.innerWidth
     },
     getS (input) {
       let nxt = 1
       let distance = this.getDistance()
       if (distance < 0) nxt = -1
-      if (this.current + nxt === this.components.length) return this.tabsInfo[this.current][input]
       return this.tabsInfo[this.current][input] + (this.tabsInfo[this.current + nxt][input] - this.tabsInfo[this.current][input]) * distance * nxt
     },
     arwAnimation () {
