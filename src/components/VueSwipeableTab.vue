@@ -125,22 +125,32 @@ export default {
   },
   methods: {
     scroll (num) {
-      if (num !== this.components.length - 1) {
-        this.scrollableWidth = 100 * (num + 2)
-      } else {
-        this.scrollableWidth = 100 * (num + 1)
-      }
-      if (num > 1) {
-        this.scrollableX = 100 * (num - 1)
-      } else {
-        this.scrollableX = 0
-      }
+      let scrollLeft = 0
       if (num > 0) {
-        this.elScroll.scrollLeft = window.innerWidth // * num
-      } else {
-        this.elScroll.scrollLeft = 0
+        scrollLeft = window.innerWidth
       }
-      this.current = num
+      this.smooth(num, scrollLeft)
+    },
+    smooth (num, target, d) {
+      d = d || (target - this.elScroll.scrollLeft) / 10
+      setTimeout(() => {
+        if (target !== this.elScroll.scrollLeft) {
+          this.elScroll.scrollLeft += d
+          this.smooth(num, target, d)
+        } else {
+          if (num !== this.components.length - 1) {
+            this.scrollableWidth = 100 * (num + 2)
+          } else {
+            this.scrollableWidth = 100 * (num + 1)
+          }
+          if (num > 1) {
+            this.scrollableX = 100 * (num - 1)
+          } else {
+            this.scrollableX = 0
+          }
+          this.current = num
+        }
+      }, 10)
     },
     tab (num) {
       this.arwWidth = this.tabsInfo[num].width
