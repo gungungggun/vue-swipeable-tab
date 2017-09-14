@@ -59,7 +59,9 @@ export default {
       isLock: {
         x: false,
         y: false
-      }
+      },
+      target: null,
+      d: null
     }
   },
   directives: {
@@ -158,22 +160,22 @@ export default {
     this.arwLeft = this.tabsInfo[0].left
   },
   methods: {
-    scroll (num, target, d) {
-      target = target || num * window.innerWidth
-      d = d || (target - this.elScroll.scrollLeft) / 10
-      let pm = d > 0 ? 1 : -1
-      setTimeout(() => {
-        if (target * pm > this.elScroll.scrollLeft * pm) {
-          if ((this.elScroll.scrollLeft + d) * pm > target * pm) {
-            this.elScroll.scrollLeft = target
-          } else {
-            this.elScroll.scrollLeft += d
-          }
-          this.scroll(num, target, d)
+    scroll (num) {
+      this.target = num * window.innerWidth
+      this.d = (this.target - this.elScroll.scrollLeft) / 10
+      this.scrollAnimation()
+      this.current = num
+    },
+    scrollAnimation () {
+      let pm = this.d > 0 ? 1 : -1
+      if (this.target * pm > this.elScroll.scrollLeft * pm) {
+        if ((this.elScroll.scrollLeft + this.d) * pm > this.target * pm) {
+          this.elScroll.scrollLeft = this.target
         } else {
-          this.current = num
+          this.elScroll.scrollLeft += this.d
         }
-      }, 5)
+        requestAnimationFrame(this.scrollAnimation)
+      }
     },
     tab (num) {
       this.arwWidth = this.tabsInfo[num].width
@@ -198,6 +200,9 @@ export default {
       this.arwWidth = this.getS('width')
       this.elTab.scrollLeft = this.getS('center') - (window.innerWidth / 2)
     }
+  },
+  ready () {
+    requestAnimationFrame(this.scrollAnimation)
   }
 }
 </script>
@@ -291,7 +296,7 @@ export default {
           &:last-child:after
             content ""
             display flex
-            width 12px
+            width 22px
             float left
           a
             color #313140
