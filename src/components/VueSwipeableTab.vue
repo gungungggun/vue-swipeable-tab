@@ -38,6 +38,7 @@ export default {
       tabsInfo: [],
       viewsScrollTop: [],
       oldX: 0,
+      swipeX: 0,
       arwWidth: 0,
       arwLeft: 0,
       isLock: {
@@ -55,17 +56,21 @@ export default {
           c.oldX = event.touches[0].clientX
         })
         el.addEventListener('touchend', (event) => {
-          let time = 100
-          setTimeout(() => {
-            if (c.getDistance() > 0.5) {
-              c.tab(c.current + 1)
-            } else if (c.getDistance() < -0.5) {
-              c.tab(c.current - 1)
-            } else {
-              c.tab(c.current)
+          let plus = 0
+          if (c.getDistance() > 0.5) {
+            plus = 1
+          } else if (c.getDistance() < -0.5) {
+            plus = -1
+          } else {
+            if (c.swipeX > 30) {
+              plus = 1
+            } else if (c.swipeX < -30) {
+              plus = -1
             }
-            c.isLock.y = false
-          }, time)
+          }
+          if (c.current + plus < 0 || c.current + plus >= c.components.length) plus = 0
+          c.tab(c.current + plus)
+          c.isLock.y = false
         })
         el.addEventListener('scroll', (event) => {
           c.arwAnimation()
@@ -73,8 +78,9 @@ export default {
         el.addEventListener('touchmove', (event) => {
           if (!c.isLock.x) {
             let oldX = event.touches[0].clientX
-            if (Math.abs(oldX - c.oldX) > 5) {
-              el.scrollLeft += (c.oldX - oldX)
+            c.swipeX = c.oldX - oldX
+            if (Math.abs(c.swipeX) > 5) {
+              el.scrollLeft += c.swipeX
               c.oldX = oldX
               c.isLock.y = true
             }
@@ -122,7 +128,7 @@ export default {
   methods: {
     scroll (num, target, d) {
       target = target || num * window.innerWidth
-      d = d || (target - this.elScroll.scrollLeft) / 5
+      d = d || (target - this.elScroll.scrollLeft) / 10
       let pm = d > 0 ? 1 : -1
       setTimeout(() => {
         if (target * pm > this.elScroll.scrollLeft * pm) {
@@ -135,7 +141,7 @@ export default {
         } else {
           this.current = num
         }
-      }, 10)
+      }, 5)
     },
     tab (num) {
       this.arwWidth = this.tabsInfo[num].width
@@ -150,6 +156,9 @@ export default {
       let nxt = 1
       let distance = this.getDistance()
       if (distance < 0) nxt = -1
+      if (this.current + nxt === this.components.length) {
+        return this.tabsInfo[this.current][input]
+      }
       return this.tabsInfo[this.current][input] + (this.tabsInfo[this.current + nxt][input] - this.tabsInfo[this.current][input]) * distance * nxt
     },
     arwAnimation () {
