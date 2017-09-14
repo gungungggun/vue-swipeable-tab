@@ -11,8 +11,9 @@
       div.scrollable(:style="{width: components.length * 100 + 'vw'}")
         div.view(v-for="(c, i) in components")
           nav.header(v-show="c.header != null" :class="viewsScrollTop[i] > showHeaderHeight ? 'swipe-tab-header-close' : ''")
-            p(v-show="false") {{ prebind }} //- 何故かこれを入れないとviewsScrollTop[i]がバインドされない
-            component(:is="c.header")
+            //- 何故かこれを入れないとviewsScrollTop[i]がバインドされない
+            p(v-show="false") {{ prebind }}
+            component(:is="c.header" v-headerscroll="")
           div.main(:id="'view' + i" :class="{lock: isLock.y}" v-mainscroll="")
             component(:is="c.main")
 </template>
@@ -36,6 +37,10 @@ export default {
     showHeaderHeight: {
       type: Number,
       default: 100
+    },
+    isHeaderLock: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -114,6 +119,21 @@ export default {
         el.addEventListener('touchend', (event) => {
           c.isLock.x = false
         })
+      }
+    },
+    headerscroll: {
+      bind (el, binding, vnode) {
+        let c = vnode.context
+        if (c.isHeaderLock) {
+          el.addEventListener('touchmove', (event) => {
+            c.isLock.x = true
+            c.isLock.y = true
+          })
+          el.addEventListener('touchend', (event) => {
+            c.isLock.x = false
+            c.isLock.y = false
+          })
+        }
       }
     }
   },
