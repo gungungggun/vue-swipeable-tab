@@ -10,7 +10,7 @@
     div.inner(v-smartscroll="")
       div.scrollable(:style="{width: scrollableWidth + 'vw', transform: 'translateX(-' + scrollableX + 'vw)'}")
         div.background(:style="{width: 100 * components.length + 'vw'}")
-          div.view(v-for="c in components")
+          div.view(v-for="(c, i) in components" :id="'view' + i" :class="{lock: isLock.y}" v-viewscroll="")
             component(:is="c")
 </template>
 
@@ -37,14 +37,16 @@ export default {
       elTab: null,
       current: 0,
       tabsInfo: [],
-      touchX: 0,
-      nowX: 0,
+      viewsScrollTop: [],
       oldX: 0,
-      isTouch: false,
       arwWidth: 0,
       arwLeft: 0,
       scrollableWidth: 0,
-      scrollableX: 0
+      scrollableX: 0,
+      isLock: {
+        x: false,
+        y: false
+      }
     }
   },
   directives: {
@@ -53,13 +55,9 @@ export default {
         let c = vnode.context
         c.elScroll = el
         el.addEventListener('touchstart', (event) => {
-          c.isTouch = true
-          c.touchX = event.touches[0].clientX
+          c.oldX = event.touches[0].clientX
         })
         el.addEventListener('touchend', (event) => {
-          c.isTouch = false
-          // let d = Math.abs(c.oldX - c.nowX)
-          // console.log(d)
           let time = 100
           setTimeout(() => {
             if (c.getDistance() > 0.5) {
@@ -69,47 +67,37 @@ export default {
             } else {
               c.tab(c.current)
             }
+            c.isLock.y = false
           }, time)
         })
         el.addEventListener('scroll', (event) => {
           c.arwAnimation()
-          // let oldX = c.nowX
-          // let nowX = el.scrollLeft
-          /* if (oldX !== nowX) {
-            c.oldX = oldX
-            c.nowX = nowX
-            c.arwAnimation()
-          } */
         })
         el.addEventListener('touchmove', (event) => {
-          let touchX = event.touches[0].clientX
-          el.scrollLeft += (c.touchX - touchX)
-          c.touchX = touchX
-
-          let oldX = c.nowX
-          let nowX = el.scrollLeft
-          if (oldX !== nowX) {
-            c.oldX = oldX
-            c.nowX = nowX
-            if (c.isTouch) {
-              if (c.getDistance() > 1) {
-                c.scrollableWidth = 100 * (c.current + 2)
-                return false
-              }
-            } else {
-              // console.log('warn: old:' + c.oldX + ', new:' + c.nowX)
-              // if (c.nowX > 360) {
-              //   el.scrollLeft = 360
-              //   c.nowX = 360
-              // }
-              // if (c.nowX <= 0) {
-              //   el.scrollLeft = 0
-              //   c.nowX = 0
-              // }
-              // el.scrollLeft = oldX
-              // c.nowX = oldX
+          if (!c.isLock.x) {
+            let oldX = event.touches[0].clientX
+            if (Math.abs(oldX - c.oldX) > 5) {
+              el.scrollLeft += (c.oldX - oldX)
+              c.oldX = oldX
+              c.isLock.y = true
             }
           }
+        })
+      }
+    },
+    viewscroll: {
+      bind (el, binding, vnode) {
+        let c = vnode.context
+        c.viewsScrollTop.push(0)
+        el.addEventListener('touchmove', (event) => {
+          let i = el.id.replace('view', '')
+          if (el.scrollTop !== c.viewsScrollTop[i]) {
+            c.isLock.x = true
+            c.viewsScrollTop[i] = el.scrollTop
+          }
+        })
+        el.addEventListener('touchend', (event) => {
+          c.isLock.x = false
         })
       }
     }
@@ -257,6 +245,8 @@ export default {
         float left
         height calc(100vh - 38px)
         overflow-y scroll
+        &.lock
+          overflow-y hidden
   &.theme-2
     .tab
       ul
