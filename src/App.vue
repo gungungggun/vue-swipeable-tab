@@ -1,7 +1,7 @@
 <template lang="pug">
   div#app
     div
-      swipeable-tab(:tabs="tabs" :components="components" :theme="1")
+      swipeable-tab(:tabs="tabs" :components="components" :theme="2")
     div
       h2 test
       p swipeable out
@@ -12,6 +12,7 @@ import SwipeableTab from './components/VueSwipeableTab'
 import Tab1 from './components/Tab1'
 import Tab2 from './components/Tab2'
 import Tab3 from './components/Tab3'
+import Head1 from './components/Head1'
 
 export default {
   name: 'app',
@@ -26,12 +27,26 @@ export default {
         'ゴルフ'
       ],
       components: [
-        Tab1,
-        Tab2,
-        Tab3,
-        Tab1,
-        Tab2,
-        Tab3
+        {
+          header: Head1,
+          main: Tab1
+        },
+        {
+          main: Tab2
+        },
+        {
+          header: Head1,
+          main: Tab3
+        },
+        {
+          main: Tab1
+        },
+        {
+          main: Tab2
+        },
+        {
+          main: Tab3
+        }
       ]
     }
   },

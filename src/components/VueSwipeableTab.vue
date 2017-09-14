@@ -9,8 +9,12 @@
 
     div.inner(v-smartscroll="")
       div.scrollable(:style="{width: components.length * 100 + 'vw'}")
-        div.view(v-for="(c, i) in components" :id="'view' + i" :class="{lock: isLock.y}" v-viewscroll="")
-          component(:is="c")
+        div.view(v-for="(c, i) in components")
+          nav.header(v-show="c.header != null" :class="viewsScrollTop[i] > showHeaderHeight ? 'swipe-tab-header-close' : ''")
+            p(v-show="false") {{ prebind }} //- 何故かこれを入れないとviewsScrollTop[i]がバインドされない
+            component(:is="c.header")
+          div.main(:id="'view' + i" :class="{lock: isLock.y}" v-mainscroll="")
+            component(:is="c.main")
 </template>
 
 <script>
@@ -28,12 +32,18 @@ export default {
     theme: {
       type: Number,
       default: 1
+    },
+    showHeaderHeight: {
+      type: Number,
+      default: 100
     }
   },
   data () {
     return {
+      prebind: '',
       elScroll: null,
       elTab: null,
+      elMains: [],
       current: 0,
       tabsInfo: [],
       viewsScrollTop: [],
@@ -88,12 +98,14 @@ export default {
         })
       }
     },
-    viewscroll: {
+    mainscroll: {
       bind (el, binding, vnode) {
         let c = vnode.context
         c.viewsScrollTop.push(0)
+        c.elMains.push(el)
         el.addEventListener('touchmove', (event) => {
           let i = el.id.replace('view', '')
+          c.prebind = c.viewsScrollTop[i]
           if (el.scrollTop !== c.viewsScrollTop[i]) {
             c.isLock.x = true
             c.viewsScrollTop[i] = el.scrollTop
@@ -176,20 +188,9 @@ export default {
   .tab
     width 100%
     position absolute
-    background #000
     z-index 1
     width 100vw
     overflow-x scroll
-    &.flex
-      ul
-        float none
-        padding 0
-        display flex
-        justify-content space-around
-        li
-          width 100%
-      .arw-area
-        top auto
     ul
       margin 0
       padding 0
@@ -200,16 +201,12 @@ export default {
         a
           padding 7px 15px
           box-sizing border-box
-          background #000
-          color #999
           display block
           width 100%
           text-align center
         &.active
           a
-            color #fff
             text-decoration none
-
     .arw-area
       width 100%
       height 2px
@@ -242,15 +239,40 @@ export default {
         width 100vw
         float left
         height calc(100vh - 38px)
-        overflow-y scroll
-        &.lock
-          overflow-y hidden
-  &.theme-2
+        .main
+          height 100%
+          overflow-y scroll
+          &.lock
+            overflow-y hidden
+      .header
+        transition .5s
+        max-height 100px
+        &.swipe-tab-header-close
+          max-height 0
+          opacity 0
+  &.theme-1
     .tab
+      background #000
       ul
         li
-          padding 10px 2px
+          a
+            background #000
+            color #999
+          &.active
+            a
+              color #fff
+  &.theme-2
+    .tab
+      padding 4px
+      ul
+        li
+          display flex
           margin 0
+          &:last-child:after
+            content ""
+            display flex
+            width 12px
+            float left
           a
             color #313140
             &:active, &:hover
@@ -260,9 +282,12 @@ export default {
               color #fff
       .arw-area
         z-index -1
-        top -4px
+        top 36px
         .arw
           border-radius 5px
           background #00a2fd
           height 38px
+    .inner
+      height calc(100vh - 46px)
+      padding-top 46px
 </style>
