@@ -5,7 +5,7 @@
         li.tabs(v-for="(t, i) in tabs" :class="{active: current == i}")
           a(@click="tab(i)") {{ t }}
       div.arw-area
-        div.arw(:style="{width: arwWidth + 'px', left: arwLeft + 'px'}")
+        div.arw(:style="{width: arwWidth + 'px', transform: 'translate3d(' + arwLeft + 'px,0,0)'}")
 
     div.inner(v-smartscroll="")
       div.scrollable(:style="{width: components.length * 100 + 'vw'}")
@@ -285,7 +285,6 @@ export default {
         height 2px
         background #f00
         position absolute
-        left 0
         bottom 0
   .inner
     width 100vw
