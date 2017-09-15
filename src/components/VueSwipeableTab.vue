@@ -246,6 +246,7 @@ export default {
       li
         float left
         a
+          transition .2s
           padding 7px 15px
           box-sizing border-box
           display block
