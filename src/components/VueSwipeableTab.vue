@@ -46,6 +46,10 @@ export default {
       type: Boolean,
       default: true
     },
+    isSequenceTab: {
+      type: Boolean,
+      default: false
+    },
     swipeBoost: {
       type: Number,
       default: 1
@@ -113,10 +117,12 @@ export default {
             c.swipeY = c.oldY - oldY
             if (Math.abs(c.swipeX) > 5 && Math.abs(c.swipeX) > Math.abs(c.swipeY)) {
               el.scrollLeft += c.swipeX * c.swipeBoost
-              if (c.getDistance() > 0.5) {
-                c.current++
-              } else if (c.getDistance() < -0.5) {
-                c.current--
+              if (c.isSequenceTab) {
+                if (c.getDistance() > 0.5) {
+                  c.current++
+                } else if (c.getDistance() < -0.5) {
+                  c.current--
+                }
               }
               c.oldX = oldX
               c.isLock.y = true
