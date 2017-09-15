@@ -53,7 +53,9 @@ export default {
       tabsInfo: [],
       viewsScrollTop: [],
       oldX: 0,
+      oldY: 0,
       swipeX: 0,
+      swipeY: 0,
       arwWidth: 0,
       arwLeft: 0,
       isLock: {
@@ -73,6 +75,7 @@ export default {
         c.elScroll = el
         el.addEventListener('touchstart', (event) => {
           c.oldX = event.touches[0].clientX
+          c.oldY = event.touches[0].clientY
         })
         el.addEventListener('touchend', (event) => {
           let plus = 0
@@ -81,9 +84,9 @@ export default {
           } else if (c.getDistance() < -0.5) {
             plus = -1
           } else {
-            if (c.swipeX > 30) {
+            if (c.swipeX > 30 && c.swipeX > c.swipeY) {
               plus = 1
-            } else if (c.swipeX < -30) {
+            } else if (c.swipeX < -30 && c.swipeX > c.swipeY) {
               plus = -1
             }
           }
@@ -97,8 +100,10 @@ export default {
         el.addEventListener('touchmove', (event) => {
           if (!c.isLock.x) {
             let oldX = event.touches[0].clientX
+            let oldY = event.touches[0].clientY
             c.swipeX = c.oldX - oldX
-            if (Math.abs(c.swipeX) > 5) {
+            c.swipeY = c.oldY - oldY
+            if (Math.abs(c.swipeX) > 5 && Math.abs(c.swipeX) > Math.abs(c.swipeY)) {
               el.scrollLeft += c.swipeX
               c.oldX = oldX
               c.isLock.y = true
