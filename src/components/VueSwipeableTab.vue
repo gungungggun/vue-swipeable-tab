@@ -68,6 +68,7 @@ export default {
       oldY: 0,
       swipeX: 0,
       swipeY: 0,
+      isSwipeLock: false,
       arwWidth: 0,
       arwLeft: 0,
       isLock: {
@@ -96,15 +97,18 @@ export default {
           } else if (c.getDistance() < -0.5) {
             plus = -1
           } else {
-            if (c.swipeX > 30 && c.swipeX > c.swipeY) {
-              plus = 1
-            } else if (c.swipeX < -30 && c.swipeX > c.swipeY) {
-              plus = -1
+            if (!c.isSwipeLock) {
+              if (c.swipeX > 30 && c.swipeX > c.swipeY) {
+                plus = 1
+              } else if (c.swipeX < -30 && c.swipeX > c.swipeY) {
+                plus = -1
+              }
             }
           }
           if (c.current + plus < 0 || c.current + plus >= c.components.length) plus = 0
           c.tab(c.current + plus)
           c.isLock.y = false
+          c.isSwipeLock = false
         })
         el.addEventListener('scroll', (event) => {
           c.arwAnimation()
@@ -120,8 +124,10 @@ export default {
               if (c.isSequenceTab) {
                 if (c.getDistance() > 0.5) {
                   c.current++
+                  c.isSwipeLock = true
                 } else if (c.getDistance() < -0.5) {
                   c.current--
+                  c.isSwipeLock = true
                 }
               }
               c.oldX = oldX
