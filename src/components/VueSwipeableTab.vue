@@ -1,7 +1,7 @@
 <template lang="pug">
   div.swipe-tab(:class="['theme-' + theme]")
     nav.tab
-      ul
+      ul(:style="{width: tabWidth + 'px'}")
         li.tabs(v-for="(t, i) in tabs" :class="{active: current == i}")
           a(@click="tab(i)") {{ t }}
       div.arw-area
@@ -61,7 +61,9 @@ export default {
         y: false
       },
       target: null,
-      d: null
+      d: null,
+      tabWidth: 5000,
+      margin: [0, 4]
     }
   },
   directives: {
@@ -143,19 +145,24 @@ export default {
     this.elTab = document.getElementsByClassName('tab')[0]
     let tabs = document.getElementsByClassName('tabs')
     let elms = []
+    let width = 0
     let left = 0
     let right = 0
+    let tabWidth = this.margin[this.theme - 1] * 3
     elms.forEach.call(tabs, (e) => {
-      right += e.clientWidth
-      let center = left + (e.clientWidth / 2)
+      width = e.clientWidth
+      right += width
+      let center = left + (width / 2)
       this.tabsInfo.push({
-        width: e.clientWidth,
+        width: width,
         left: left,
         right: right,
         center: center
       })
-      left += e.clientWidth
+      left += width
+      tabWidth += width
     })
+    this.tabWidth = tabWidth
     this.arwWidth = this.tabsInfo[0].width
     this.arwLeft = this.tabsInfo[0].left
   },
@@ -221,6 +228,11 @@ export default {
       padding 0
       list-style none
       width 1000%
+      &:after
+        content ""
+        display block
+        overflow hidden
+        clear both
       li
         float left
         a
@@ -236,7 +248,6 @@ export default {
       width 100%
       height 2px
       position relative
-      top 36px
       .arw
         transition 0.1s
         display block
@@ -293,11 +304,6 @@ export default {
         li
           display flex
           margin 0
-          &:last-child:after
-            content ""
-            display flex
-            width 22px
-            float left
           a
             color #313140
             &:active, &:hover
@@ -307,7 +313,7 @@ export default {
               color #fff
       .arw-area
         z-index -1
-        top 36px
+        top -2px
         .arw
           border-radius 5px
           background #00a2fd

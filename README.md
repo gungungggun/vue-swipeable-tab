@@ -1,6 +1,7 @@
 # vue-swipeable-tab
 
-A swipeable tab Vue component, Compatible with Vue 2.x
+A swipeable tab Vue component, Compatible with Vue 2.x.  
+This component works only on mobile.
 
 ## Install
 
