@@ -14,7 +14,7 @@
             //- 何故かこれを入れないとviewsScrollTop[i]がバインドされない
             p(v-show="false") {{ prebind }}
             component(:is="c.header" v-headerscroll="")
-          div.main(:id="'view' + i" :class="{lock: isLock.y}" v-mainscroll="")
+          div.main(:id="'view' + i" :class="{lock: isLock.y, withtop: c.header != null}" v-mainscroll="")
             component(:is="c.main")
 </template>
 
@@ -22,6 +22,10 @@
 export default {
   name: 'swipe-tab',
   props: {
+    current: {
+      type: Number,
+      default: 0
+    },
     tabs: {
       type: Array,
       default: []
@@ -61,7 +65,6 @@ export default {
       elScroll: null,
       elTab: null,
       elMains: [],
-      current: 0,
       tabsInfo: [],
       viewsScrollTop: [],
       oldX: 0,
@@ -195,6 +198,8 @@ export default {
     this.tabWidth = tabWidth
     this.arwWidth = this.tabsInfo[0].width
     this.arwLeft = this.tabsInfo[0].left
+
+    this.tab(this.current)
   },
   methods: {
     scroll (num) {
@@ -308,13 +313,18 @@ export default {
         .main
           height 100%
           overflow-y scroll
+          &.withtop
+            padding-top 65px
           &.lock
             overflow-y hidden
       .header
-        transition .5s
-        max-height 100px
+        transition .3s
+        position absolute
+        top 0
+        z-index 1
+        transform translate3d(0, 0, 0)
         &.swipe-tab-header-close
-          max-height 0
+          transform translate3d(0, -80px, 0)
           opacity 0
   &.theme-1
     .tab
