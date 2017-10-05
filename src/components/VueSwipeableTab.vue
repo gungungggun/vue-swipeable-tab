@@ -22,10 +22,6 @@
 export default {
   name: 'swipe-tab',
   props: {
-    current: {
-      type: Number,
-      default: 0
-    },
     tabs: {
       type: Array,
       default: []
@@ -61,6 +57,7 @@ export default {
   },
   data () {
     return {
+      current: 0,
       prebind: '',
       elScroll: null,
       elTab: null,
