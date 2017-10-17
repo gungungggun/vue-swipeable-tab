@@ -78,7 +78,9 @@ export default {
       target: null,
       d: null,
       tabWidth: 5000,
-      margin: [0, 4]
+      margin: [0, 4],
+      isOverScroll: false,
+      overScrollOldY: null
     }
   },
   directives: {
@@ -149,9 +151,24 @@ export default {
             c.isLock.x = true
             c.viewsScrollTop[i] = el.scrollTop
           }
+          if (el.scrollTop === 0 && !c.isLock.y) {
+            if (c.isOverScroll) {
+              if (c.overScrollOldY !== null) {
+                let diff = c.overScrollOldY - event.touches[0].clientY
+                c.$emit('overScroll', diff)
+              }
+              c.overScrollOldY = event.touches[0].clientY
+            }
+            c.isOverScroll = true
+          } else {
+            c.isOverScroll = false
+          }
         })
         el.addEventListener('touchend', (event) => {
           c.isLock.x = false
+          c.isOverScroll = false
+          c.overScrollOldY = null
+          c.$emit('overScrollCancel')
         })
       }
     },
