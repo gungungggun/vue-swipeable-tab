@@ -327,6 +327,7 @@ export default {
         .main
           height 100%
           overflow-y scroll
+          -webkit-overflow-scrolling touch
           &.withtop
             padding-top 65px
           &.lock
