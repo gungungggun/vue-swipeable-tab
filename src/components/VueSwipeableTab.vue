@@ -10,7 +10,7 @@
     div.inner(v-smartscroll="")
       div.scrollable(:style="{width: components.length * 100 + 'vw'}")
         div.view(v-for="(c, i) in components")
-          nav.header(v-show="c.header != null" :class="viewsScrollTop[i] > showHeaderHeight ? 'swipe-tab-header-close' : ''")
+          nav.header(v-show="c.header != null" :class="isHeaderShows[i] ? '' : 'swipe-tab-header-close'")
             //- 何故かこれを入れないとviewsScrollTop[i]がバインドされない
             p(v-show="false") {{ prebind }}
             component(:is="c.header" v-headerscroll="")
@@ -64,6 +64,7 @@ export default {
       elMains: [],
       tabsInfo: [],
       viewsScrollTop: [],
+      isHeaderShows: [],
       oldX: 0,
       oldY: 0,
       swipeX: 0,
@@ -150,6 +151,11 @@ export default {
           if (el.scrollTop !== c.viewsScrollTop[i]) {
             c.isLock.x = true
             c.viewsScrollTop[i] = el.scrollTop
+            if (c.viewsScrollTop[i] > c.showHeaderHeight) {
+              c.isHeaderShows[i] = false
+            } else {
+              c.isHeaderShows[i] = true
+            }
           }
           if (el.scrollTop === 0 && !c.isLock.y) {
             if (c.isOverScroll) {
@@ -197,6 +203,7 @@ export default {
     let right = 0
     let tabWidth = this.margin[this.theme - 1] * 3
     elms.forEach.call(tabs, (e) => {
+      this.isHeaderShows.push(true)
       width = e.clientWidth
       right += width
       let center = left + (width / 2)
