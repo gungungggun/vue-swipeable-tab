@@ -157,7 +157,7 @@ export default {
               c.isHeaderShows[i] = true
             }
           }
-          if (el.scrollTop === 0 && !c.isLock.y) {
+          if (el.scrollTop <= 0 && !c.isLock.y) {
             if (c.isOverScroll) {
               if (c.overScrollOldY !== null) {
                 let diff = c.overScrollOldY - event.touches[0].clientY
