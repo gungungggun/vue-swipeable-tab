@@ -15,7 +15,7 @@
             p(v-show="false") {{ prebind }}
             component(:is="c.header" v-headerscroll="")
           div.main(:id="'view' + i" :class="{lock: isLock.y, withtop: c.header != null}" v-mainscroll="")
-            component(:is="c.main")
+            component(:is="c.main" :class="'vue-scrollable-main-inner'")
 </template>
 
 <script>
@@ -53,6 +53,10 @@ export default {
     swipeBoost: {
       type: Number,
       default: 1
+    },
+    threshold: {
+      type: Number,
+      default: 0
     }
   },
   data () {
@@ -152,6 +156,10 @@ export default {
             document.getElementsByClassName('vue-scrollable-header')[i].classList.add('swipe-tab-header-close')
           } else {
             document.getElementsByClassName('vue-scrollable-header')[i].classList.remove('swipe-tab-header-close')
+          }
+          let inner = document.getElementsByClassName('vue-scrollable-main-inner')[i]
+          if (inner.clientHeight - 500 - c.threshold < el.scrollTop) {
+            c.$emit('thresholdScroll')
           }
         }, {passive: true})
         el.addEventListener('touchmove', (event) => {
