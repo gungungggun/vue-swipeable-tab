@@ -164,6 +164,7 @@ export default {
             if (c.isOverScroll) {
               if (c.overScrollOldY !== null) {
                 let diff = c.overScrollOldY - event.touches[0].clientY
+                c.$emit('overScroll', diff)
               }
               c.overScrollOldY = event.touches[0].clientY
             }
