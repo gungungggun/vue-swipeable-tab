@@ -92,7 +92,7 @@ export default {
         el.addEventListener('touchstart', (event) => {
           c.oldX = event.touches[0].clientX
           c.oldY = event.touches[0].clientY
-        })
+        }, {passive: true})
         el.addEventListener('touchend', (event) => {
           let plus = 0
           if (c.getDistance() > 0.5) {
@@ -112,10 +112,10 @@ export default {
           c.tab(c.current + plus)
           c.isLock.y = false
           c.isSwipeLock = false
-        })
+        }, {passive: true})
         el.addEventListener('scroll', (event) => {
           c.arwAnimation()
-        })
+        }, {passive: true})
         el.addEventListener('touchmove', (event) => {
           if (!c.isLock.x) {
             let oldX = event.touches[0].clientX
@@ -137,7 +137,7 @@ export default {
               c.isLock.y = true
             }
           }
-        })
+        }, {passive: true})
       }
     },
     mainscroll: {
@@ -145,17 +145,19 @@ export default {
         let c = vnode.context
         c.viewsScrollTop.push(0)
         c.elMains.push(el)
+        el.addEventListener('scrill', (event) => {
+          c.viewsScrollTop[i] = el.scrollTop
+          if (el.scrollTop > c.showHeaderHeight) {
+            c.isHeaderShows[i] = false
+          } else {
+            c.isHeaderShows[i] = true
+          }
+        }, {passive: true})
         el.addEventListener('touchmove', (event) => {
           let i = el.id.replace('view', '')
           c.prebind = c.viewsScrollTop[i]
           if (el.scrollTop !== c.viewsScrollTop[i]) {
             c.isLock.x = true
-            c.viewsScrollTop[i] = el.scrollTop
-            if (c.viewsScrollTop[i] > c.showHeaderHeight) {
-              c.isHeaderShows[i] = false
-            } else {
-              c.isHeaderShows[i] = true
-            }
           }
           if (el.scrollTop <= 0 && !c.isLock.y) {
             if (c.isOverScroll) {
@@ -169,13 +171,13 @@ export default {
           } else {
             c.isOverScroll = false
           }
-        })
+        }, {passive: true})
         el.addEventListener('touchend', (event) => {
           c.isLock.x = false
           c.isOverScroll = false
           c.overScrollOldY = null
           c.$emit('overScrollCancel')
-        })
+        }, {passive: true})
       }
     },
     headerscroll: {
@@ -185,11 +187,11 @@ export default {
           el.addEventListener('touchmove', (event) => {
             c.isLock.x = true
             c.isLock.y = true
-          })
+          }, {passive: true})
           el.addEventListener('touchend', (event) => {
             c.isLock.x = false
             c.isLock.y = false
-          })
+          }, {passive: true})
         }
       }
     }
