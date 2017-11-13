@@ -10,7 +10,7 @@
     div.inner(v-smartscroll="")
       div.scrollable(:style="{width: components.length * 100 + 'vw'}")
         div.view(v-for="(c, i) in components")
-          nav.header(v-show="c.header != null" :class="isHeaderShows[i] ? '' : 'swipe-tab-header-close'")
+          nav.vue-scrollable-header(v-show="c.header != null")
             //- 何故かこれを入れないとviewsScrollTop[i]がバインドされない
             p(v-show="false") {{ prebind }}
             component(:is="c.header" v-headerscroll="")
@@ -145,12 +145,13 @@ export default {
         let c = vnode.context
         c.viewsScrollTop.push(0)
         c.elMains.push(el)
-        el.addEventListener('scrill', (event) => {
+        el.addEventListener('scroll', (event) => {
+          let i = el.id.replace('view', '')
           c.viewsScrollTop[i] = el.scrollTop
           if (el.scrollTop > c.showHeaderHeight) {
-            c.isHeaderShows[i] = false
+            document.getElementsByClassName('vue-scrollable-header')[i].classList.add('swipe-tab-header-close')
           } else {
-            c.isHeaderShows[i] = true
+            document.getElementsByClassName('vue-scrollable-header')[i].classList.remove('swipe-tab-header-close')
           }
         }, {passive: true})
         el.addEventListener('touchmove', (event) => {
@@ -163,7 +164,6 @@ export default {
             if (c.isOverScroll) {
               if (c.overScrollOldY !== null) {
                 let diff = c.overScrollOldY - event.touches[0].clientY
-                c.$emit('overScroll', diff)
               }
               c.overScrollOldY = event.touches[0].clientY
             }
@@ -341,7 +341,7 @@ export default {
             padding-top 65px
           &.lock
             overflow-y hidden
-      .header
+      .vue-scrollable-header
         transition .3s
         position absolute
         top 0
